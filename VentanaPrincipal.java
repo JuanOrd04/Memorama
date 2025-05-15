@@ -1,6 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class VentanaPrincipal extends JFrame {
 
@@ -14,7 +17,7 @@ public class VentanaPrincipal extends JFrame {
         // Imagen superior
         JLabel imagenLabel = new JLabel();
         try {
-            ImageIcon icono = new ImageIcon("C:\\Users\\V16\\Downloads\\magoDelasPalbras.jpeg");
+            ImageIcon icono = new ImageIcon("C:\\Users\\V16\\Downloads\\Memorama.png");
             Image imagenEscalada = icono.getImage().getScaledInstance(350, 250, Image.SCALE_SMOOTH);
             imagenLabel.setIcon(new ImageIcon(imagenEscalada));
             imagenLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -199,9 +202,9 @@ class VentanaSeleccionModoJuego extends JFrame {
         panelModos.setBackground(new Color(245, 245, 245));
 
         // Crear 3 opciones con imagen y botón debajo
-        panelModos.add(crearPanelModo("Figuras", "figuras.png", new Color(173, 216, 230)));
-        panelModos.add(crearPanelModo("Emojis", "emojis.png", new Color(255, 239, 150)));
-        panelModos.add(crearPanelModo("Animales", "animales.png", new Color(255, 182, 193)));
+        panelModos.add(crearPanelModo("Figuras", "C:\\Users\\V16\\Downloads\\PortadaAutos.jpg", new Color(173, 216, 230)));
+        panelModos.add(crearPanelModo("Emojis", "C:\\Users\\V16\\Downloads\\PortadaFutbol.jpg", new Color(255, 239, 150)));
+        panelModos.add(crearPanelModo("Animales", "C:\\Users\\V16\\Downloads\\PortadaMusica.jpg", new Color(255, 182, 193)));
 
         add(panelModos, BorderLayout.CENTER);
         setVisible(true);
@@ -214,7 +217,7 @@ class VentanaSeleccionModoJuego extends JFrame {
         JLabel imagen = new JLabel();
         try {
             ImageIcon icono = new ImageIcon(imagenArchivo);
-            Image img = icono.getImage().getScaledInstance(120, 120, Image.SCALE_SMOOTH);
+            Image img = icono.getImage().getScaledInstance(220, 520, Image.SCALE_SMOOTH);
             imagen.setIcon(new ImageIcon(img));
             imagen.setHorizontalAlignment(SwingConstants.CENTER);
         } catch (Exception e) {
@@ -252,85 +255,72 @@ class VentanaSeleccionModoJuego extends JFrame {
 
         return panel;
     }
-
-
-
-
-
-
-    class VentanaPartida extends JFrame {
-
-        private JButton[] botones = new JButton[20];
-        private JLabel turnoLabel;
-        private JLabel[] puntajes;
-        private int turnoActual = 0;
+    
+    public class VentanaPartida extends JFrame {
         private int numeroJugadores;
-        private ImageIcon imagenOculta;
+        private String modo;
+        private JButton[] botones;
+        private ImageIcon reversoIcon;
 
-        public VentanaPartida(String tipoTarjeta, int numeroJugadores) {
-            this.numeroJugadores = numeroJugadores;
+        public VentanaPartida(String modoSeleccionado, int jugadores) {
+            this.modo = modoSeleccionado;
+            this.numeroJugadores = jugadores;
+            this.reversoIcon = new ImageIcon(new ImageIcon("C:\\Users\\V16\\Downloads\\Carta.png").getImage().getScaledInstance(160, 140, Image.SCALE_SMOOTH));
 
-            setTitle("Memorama - " + tipoTarjeta);
-            setSize(700, 550);
+            setTitle("Memorama - " + modo);
+            setSize(800, 600);
             setLocationRelativeTo(null);
             setDefaultCloseOperation(EXIT_ON_CLOSE);
             setLayout(new BorderLayout());
 
-            // Barra superior con información
-            JPanel panelSuperior = new JPanel(new GridLayout(2, 1));
-            panelSuperior.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
-
-            turnoLabel = new JLabel("Turno: Jugador 1", SwingConstants.CENTER);
-            turnoLabel.setFont(new Font("Arial", Font.BOLD, 18));
-            panelSuperior.add(turnoLabel);
-
-            JPanel panelPuntajes = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 5));
-            puntajes = new JLabel[numeroJugadores];
+            // Panel para puntajes y turno
+            JPanel panelInfo = new JPanel(new GridLayout(1, numeroJugadores + 1));
+            JLabel[] puntajes = new JLabel[numeroJugadores];
             for (int i = 0; i < numeroJugadores; i++) {
                 puntajes[i] = new JLabel("Jugador " + (i + 1) + ": 0 pts");
-                puntajes[i].setFont(new Font("Arial", Font.PLAIN, 14));
-                puntajes[i].setForeground(new Color(0, 80, 160));
-                panelPuntajes.add(puntajes[i]);
+                panelInfo.add(puntajes[i]);
             }
-            panelSuperior.add(panelPuntajes);
-            add(panelSuperior, BorderLayout.NORTH);
+            JLabel turno = new JLabel("Turno: Jugador 1");
+            panelInfo.add(turno);
+            add(panelInfo, BorderLayout.NORTH);
 
-            // Panel del juego con 20 botones
-            JPanel panelJuego = new JPanel(new GridLayout(5, 4, 10, 10));
-            panelJuego.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-            panelJuego.setBackground(Color.LIGHT_GRAY);
+            // Panel del tablero
+            JPanel panelTablero = new JPanel(new GridLayout(4, 5, 10, 10));
+            botones = new JButton[20];
 
-            imagenOculta = new ImageIcon("ejemplo.png"); // Cambia por una imagen real
-            Image img = imagenOculta.getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH);
-            imagenOculta = new ImageIcon(img);
+            
+            List<ImageIcon> imagenes = new ArrayList<>();
+            for (int i = 1; i <= 10; i++) {
+                String nombreArchivo = modo.toLowerCase() + i + ".png"; 
+                ImageIcon icon = new ImageIcon(new ImageIcon(nombreArchivo).getImage().getScaledInstance(60, 60, Image.SCALE_SMOOTH));
+                imagenes.add(icon);
+                imagenes.add(icon); // duplicar para el par
+            }
+            Collections.shuffle(imagenes);
 
             for (int i = 0; i < 20; i++) {
-                JButton btn = new JButton();
-                btn.setBackground(Color.WHITE);
-                btn.setFocusPainted(false);
-                btn.setFont(new Font("Arial", Font.BOLD, 12));
-                int index = i;
+                JButton boton = new JButton();
+                boton.setIcon(reversoIcon); // Imagen de reverso
+                boton.setFocusable(false);
 
-                btn.addActionListener(e -> {
-                    botones[index].setIcon(imagenOculta);
-                    botones[index].setEnabled(false);
+                ImageIcon iconoCorrecto = imagenes.get(i);
 
-                    // Aquí más adelante se puede agregar la lógica para mostrar pares y sumar puntos
-                    siguienteTurno();
+                boton.addActionListener(e -> {
+                    boton.setIcon(iconoCorrecto); // Revelar imagen al hacer clic
+                    boton.setEnabled(false); 
                 });
 
-                botones[i] = btn;
-                panelJuego.add(btn);
+                botones[i] = boton;
+                panelTablero.add(boton);
             }
 
-            add(panelJuego, BorderLayout.CENTER);
+            add(panelTablero, BorderLayout.CENTER);
             setVisible(true);
         }
-
-        private void siguienteTurno() {
-            turnoActual = (turnoActual + 1) % numeroJugadores;
-            turnoLabel.setText("Turno: Jugador " + (turnoActual + 1));
-        }
     }}
+
+
+
+
 
 
